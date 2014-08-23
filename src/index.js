@@ -43,7 +43,7 @@ var gameStage = new PIXI.Stage();
 var playerTexture = PIXI.Texture.fromImage("img/player.png");
 var doorTexture = PIXI.Texture.fromImage("img/door.png");
 
-var playerSpeed = 0.2;
+var playerSpeed = 0.3;
 var doorY = 320;
 var doorSpacing = 120;
 var doorStartX = (width - 2 * doorSpacing) / 2;
@@ -133,7 +133,11 @@ function loadLevel (l) {
     }
   });
 
+  objectsContainer.children.forEach(function (child) {
+    child.removeStageReference();
+  });
   objectsContainer.children = [];
+  console.log(objectsContainer.children);
   (next.objects||[]).forEach(function (obj) {
     var spec = map.objects[obj.id];
     var sprite = new PIXI.Sprite(PIXI.Texture.fromImage(spec.img));
