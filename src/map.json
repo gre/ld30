@@ -1,0 +1,122 @@
+{
+  "objects": {
+    "apple": {
+      "t": "item",
+      "name": "Apple",
+      "img": "img/objects/apple.png",
+      "thumb": "img/items/apple.png",
+      "anchor": { "x": 0.5, "y": 1 }
+    },
+    "roomdoorout": {
+      "t": "door",
+      "name": "Door to your room",
+      "img": "img/roomdoorout.png",
+      "anchor": { "x": 0, "y": 1 }
+    },
+    "roomdoorin": {
+      "t": "door",
+      "name": "Door to the City",
+      "img": "img/roomdoorin.png",
+      "anchor": { "x": 0, "y": 1 }
+    },
+    "bed": {
+      "t": "door",
+      "name": "My Dear Bed",
+      "img": "img/bed.png",
+      "anchor": { "x": 0.5, "y": 1 }
+    }
+  },
+
+  "start": "city",
+  "levels": {
+
+    "city": {
+      "title": "What a noisy place",
+      "bg": "img/bg/city.png",
+      "objects": [
+        {
+          "id": "roomdoorout",
+          "x": 900,
+          "y": 300,
+          "target": "room"
+        }
+      ]
+    },
+    "room": {
+      "title": "I'm a bit tired...",
+      "bg": "img/bg/room.png",
+      "objects": [
+        {
+          "id": "roomdoorin",
+          "x": 900,
+          "y": 300,
+          "target": "city"
+        },
+        {
+          "id": "bed",
+          "x": 300,
+          "y": 400,
+          "target": "A"
+        }
+      ]
+    },
+
+    "A": {
+      "title": "Where is civilisation?",
+      "bg": "img/bg/A.png",
+      "timeout": {
+        "delay": 3000,
+        "target": "A2"
+      }
+    },
+    "A2": {
+      "title": "3 doors ?!",
+      "bg": "img/bg/A.png",
+      "doors": [ "A3", "A3", "A3" ]
+    },
+    "A3": {
+      "title": "TODO",
+      "bg": "img/bg/A.png",
+      "doors": [ "roomEnd", "roomEnd", "roomEnd" ],
+      "objects": [
+        {
+          "id": "apple",
+          "x": 700,
+          "y": 400
+        }
+      ]
+    },
+
+    "roomEnd": {
+      "title": "What an aweful nightmare",
+      "bg": "img/bg/room.png",
+      "objects": [
+        {
+          "id": "roomdoorin",
+          "x": 900,
+          "y": 300,
+          "target": "cityEnd"
+        },
+        {
+          "id": "bed",
+          "x": 300,
+          "y": 400
+        }
+      ]
+    },
+
+    "cityEnd": {
+      "title": "THE END",
+      "bg": "img/bg/cityEnd.png",
+      "timeout": {
+        "delay": 5000,
+        "target": "credits"
+      }
+    },
+
+    "credits": {
+      "title": "by @greweb",
+      "bg": "img/bg/credits.png"
+    }
+  }
+}
