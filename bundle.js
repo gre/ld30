@@ -409,10 +409,12 @@ var gameStage = new PIXI.Stage();
 var playerTexture = PIXI.Texture.fromImage("img/player.png");
 var doorTexture = PIXI.Texture.fromImage("img/door.png");
 
-var playerSpeed = 0.2;
-var doorY = 320;
+var playerSpeed = 0.3;
+var doorY = 400;
 var doorSpacing = 120;
 var doorStartX = (width - 2 * doorSpacing) / 2;
+
+playerSpeed *= 10;
 
 // States
 var stage = gameStage;
@@ -480,6 +482,28 @@ loadLevel(map.start);
 
 // Functions
 
+function createObject (obj) {
+  var spec = map.objects[obj.id];
+  var sprite = new PIXI.Sprite(PIXI.Texture.fromImage(spec.img));
+  obj.spec = spec;
+  obj.sprite = sprite;
+  sprite.spec = spec;
+  sprite.obj = obj;
+  if (spec.anchor) {
+    sprite.anchor.x = spec.anchor.x;
+    sprite.anchor.y = spec.anchor.y;
+  }
+  sprite.position = new PIXI.Point(obj.x, obj.y);
+  sprite.interactive = true;
+  sprite.buttonMode = true;
+  sprite.touchstart = sprite.mousedown = function (e) {
+    move(sprite.position, function () {
+      onObjectClicked(obj);
+    });
+  };
+  objectsContainer.addChild(sprite);
+}
+
 function loadLevel (l) {
   var current = level;
   var next = map.levels[l];
@@ -499,27 +523,12 @@ function loadLevel (l) {
     }
   });
 
+  objectsContainer.children.forEach(function (child) {
+    child.removeStageReference();
+  });
   objectsContainer.children = [];
   (next.objects||[]).forEach(function (obj) {
-    var spec = map.objects[obj.id];
-    var sprite = new PIXI.Sprite(PIXI.Texture.fromImage(spec.img));
-    obj.spec = spec;
-    obj.sprite = sprite;
-    sprite.spec = spec;
-    sprite.obj = obj;
-    if (spec.anchor) {
-      sprite.anchor.x = spec.anchor.x;
-      sprite.anchor.y = spec.anchor.y;
-    }
-    sprite.position = new PIXI.Point(obj.x, obj.y);
-    sprite.interactive = true;
-    sprite.buttonMode = true;
-    sprite.touchstart = sprite.mousedown = function (e) {
-      move(sprite.position, function () {
-        onObjectClicked(obj);
-      });
-    };
-    objectsContainer.addChild(sprite);
+    createObject(obj);
   });
 
   levelTime = now();
@@ -566,6 +575,15 @@ function onObjectClicked (obj) {
     removeFromMap(obj);
     objectsContainer.removeChild(obj.sprite);
     addItem(obj);
+  }
+  else if (obj.trigger) {
+    var fn = eval(obj.trigger.fn);
+    if (typeof fn === "function") {
+      fn.apply(null, obj.trigger.args);
+    }
+    else {
+      console.log("Function not found.", obj.trigger);
+    }
   }
   else {
     console.log("Object click not handled:", obj);
@@ -622,6 +640,12 @@ gameStage.mousedown = gameStage.touchstart = function (e) {
 },{"./map.json":8,"bezier-easing":1,"performance-now":3,"pixi.js":4,"raf":5,"smoothstep":6}],8:[function(require,module,exports){
 module.exports={
   "objects": {
+    "tree": {
+      "t": "tree",
+      "name": "Tree",
+      "img": "img/tree.png",
+      "anchor": { "x": 0.5, "y": 1 }
+    },
     "apple": {
       "t": "item",
       "name": "Apple",
@@ -659,7 +683,7 @@ module.exports={
         {
           "id": "roomdoorout",
           "x": 900,
-          "y": 300,
+          "y": 400,
           "target": "room"
         }
       ]
@@ -671,13 +695,13 @@ module.exports={
         {
           "id": "roomdoorin",
           "x": 900,
-          "y": 300,
+          "y": 400,
           "target": "city"
         },
         {
           "id": "bed",
           "x": 300,
-          "y": 400,
+          "y": 450,
           "target": "A"
         }
       ]
@@ -687,26 +711,53 @@ module.exports={
       "title": "Where is civilisation?",
       "bg": "img/bg/A.png",
       "timeout": {
-        "delay": 3000,
+        "delay": 1000,
         "target": "A2"
       }
     },
     "A2": {
+      "transition": "flash",
       "title": "3 doors ?!",
       "bg": "img/bg/A.png",
-      "doors": [ "A3", "A3", "A3" ]
+      "doors": [ "moon", "moon", "moon" ]
     },
     "A3": {
-      "title": "TODO",
+      "title": "Tree of life",
       "bg": "img/bg/A.png",
       "doors": [ "roomEnd", "roomEnd", "roomEnd" ],
       "objects": [
         {
-          "id": "apple",
-          "x": 700,
-          "y": 400
+          "id": "tree",
+          "x": 800,
+          "y": 400,
+          "trigger": {
+            "fn": "createObject",
+            "args": [{
+              "id": "apple",
+              "x": 800,
+              "y": 500
+            }]
+          }
         }
       ]
+    },
+
+    "moon": {
+      "title": "Wait, what?",
+      "bg": "img/bg/moon.png",
+      "doors": ["A3", "etroom1", "etroom2"]
+    },
+
+    "etroom1": {
+      "title": "Strange place",
+      "bg": "img/bg/etroom1.png",
+      "doors": ["etroom2", "moon", null]
+    },
+
+    "etroom2": {
+      "title": "Strange place",
+      "bg": "img/bg/etroom2.png",
+      "doors": ["etroom1", null, "moon"]
     },
 
     "roomEnd": {
@@ -716,13 +767,13 @@ module.exports={
         {
           "id": "roomdoorin",
           "x": 900,
-          "y": 300,
+          "y": 400,
           "target": "cityEnd"
         },
         {
           "id": "bed",
           "x": 300,
-          "y": 400
+          "y": 450
         }
       ]
     },
