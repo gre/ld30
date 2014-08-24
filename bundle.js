@@ -414,8 +414,6 @@ var doorY = 400;
 var doorSpacing = 120;
 var doorStartX = (width - 2 * doorSpacing) / 2;
 
-playerSpeed *= 10;
-
 // States
 var stage = gameStage;
 
