@@ -1,5 +1,11 @@
 {
   "objects": {
+    "tree": {
+      "t": "tree",
+      "name": "Tree",
+      "img": "img/tree.png",
+      "anchor": { "x": 0.5, "y": 1 }
+    },
     "apple": {
       "t": "item",
       "name": "Apple",
@@ -37,7 +43,7 @@
         {
           "id": "roomdoorout",
           "x": 900,
-          "y": 300,
+          "y": 400,
           "target": "room"
         }
       ]
@@ -49,13 +55,13 @@
         {
           "id": "roomdoorin",
           "x": 900,
-          "y": 300,
+          "y": 400,
           "target": "city"
         },
         {
           "id": "bed",
           "x": 300,
-          "y": 400,
+          "y": 450,
           "target": "A"
         }
       ]
@@ -65,26 +71,53 @@
       "title": "Where is civilisation?",
       "bg": "img/bg/A.png",
       "timeout": {
-        "delay": 3000,
+        "delay": 1000,
         "target": "A2"
       }
     },
     "A2": {
+      "transition": "flash",
       "title": "3 doors ?!",
       "bg": "img/bg/A.png",
-      "doors": [ "A3", "A3", "A3" ]
+      "doors": [ "moon", "moon", "moon" ]
     },
     "A3": {
-      "title": "TODO",
+      "title": "Tree of life",
       "bg": "img/bg/A.png",
       "doors": [ "roomEnd", "roomEnd", "roomEnd" ],
       "objects": [
         {
-          "id": "apple",
-          "x": 700,
-          "y": 400
+          "id": "tree",
+          "x": 800,
+          "y": 400,
+          "trigger": {
+            "fn": "createObject",
+            "args": [{
+              "id": "apple",
+              "x": 800,
+              "y": 500
+            }]
+          }
         }
       ]
+    },
+
+    "moon": {
+      "title": "Wait, what?",
+      "bg": "img/bg/moon.png",
+      "doors": ["A3", "etroom1", "etroom2"]
+    },
+
+    "etroom1": {
+      "title": "Strange place",
+      "bg": "img/bg/etroom1.png",
+      "doors": ["etroom2", "moon", null]
+    },
+
+    "etroom2": {
+      "title": "Strange place",
+      "bg": "img/bg/etroom2.png",
+      "doors": ["etroom1", null, "moon"]
     },
 
     "roomEnd": {
@@ -94,13 +127,13 @@
         {
           "id": "roomdoorin",
           "x": 900,
-          "y": 300,
+          "y": 400,
           "target": "cityEnd"
         },
         {
           "id": "bed",
           "x": 300,
-          "y": 400
+          "y": 450
         }
       ]
     },
