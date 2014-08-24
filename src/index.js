@@ -43,10 +43,12 @@ var gameStage = new PIXI.Stage();
 var playerTexture = PIXI.Texture.fromImage("img/player.png");
 var doorTexture = PIXI.Texture.fromImage("img/door.png");
 
-var playerSpeed = 0.2;
-var doorY = 320;
+var playerSpeed = 0.3;
+var doorY = 400;
 var doorSpacing = 120;
 var doorStartX = (width - 2 * doorSpacing) / 2;
+
+playerSpeed *= 10;
 
 // States
 var stage = gameStage;
@@ -114,6 +116,28 @@ loadLevel(map.start);
 
 // Functions
 
+function createObject (obj) {
+  var spec = map.objects[obj.id];
+  var sprite = new PIXI.Sprite(PIXI.Texture.fromImage(spec.img));
+  obj.spec = spec;
+  obj.sprite = sprite;
+  sprite.spec = spec;
+  sprite.obj = obj;
+  if (spec.anchor) {
+    sprite.anchor.x = spec.anchor.x;
+    sprite.anchor.y = spec.anchor.y;
+  }
+  sprite.position = new PIXI.Point(obj.x, obj.y);
+  sprite.interactive = true;
+  sprite.buttonMode = true;
+  sprite.touchstart = sprite.mousedown = function (e) {
+    move(sprite.position, function () {
+      onObjectClicked(obj);
+    });
+  };
+  objectsContainer.addChild(sprite);
+}
+
 function loadLevel (l) {
   var current = level;
   var next = map.levels[l];
@@ -133,27 +157,12 @@ function loadLevel (l) {
     }
   });
 
+  objectsContainer.children.forEach(function (child) {
+    child.removeStageReference();
+  });
   objectsContainer.children = [];
   (next.objects||[]).forEach(function (obj) {
-    var spec = map.objects[obj.id];
-    var sprite = new PIXI.Sprite(PIXI.Texture.fromImage(spec.img));
-    obj.spec = spec;
-    obj.sprite = sprite;
-    sprite.spec = spec;
-    sprite.obj = obj;
-    if (spec.anchor) {
-      sprite.anchor.x = spec.anchor.x;
-      sprite.anchor.y = spec.anchor.y;
-    }
-    sprite.position = new PIXI.Point(obj.x, obj.y);
-    sprite.interactive = true;
-    sprite.buttonMode = true;
-    sprite.touchstart = sprite.mousedown = function (e) {
-      move(sprite.position, function () {
-        onObjectClicked(obj);
-      });
-    };
-    objectsContainer.addChild(sprite);
+    createObject(obj);
   });
 
   levelTime = now();
@@ -200,6 +209,15 @@ function onObjectClicked (obj) {
     removeFromMap(obj);
     objectsContainer.removeChild(obj.sprite);
     addItem(obj);
+  }
+  else if (obj.trigger) {
+    var fn = eval(obj.trigger.fn);
+    if (typeof fn === "function") {
+      fn.apply(null, obj.trigger.args);
+    }
+    else {
+      console.log("Function not found.", obj.trigger);
+    }
   }
   else {
     console.log("Object click not handled:", obj);
